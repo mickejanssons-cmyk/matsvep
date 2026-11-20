@@ -8,7 +8,7 @@ import { SEED } from './seed.mjs';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const LIMIT = { ica: 140, lidl: 70, linas: 120 };
+const LIMIT = { ica: 190, lidl: 70, linas: 130 };
 
 async function get(url, { json = false, tries = 3 } = {}) {
   for (let i = 0; i < tries; i++) {
@@ -59,7 +59,7 @@ function build(src, url, name, img, yieldv, mins, raw, types) {
 
 // ---------- Recept ----------
 async function ica() {
-  const cats = [['frukost', 'f'], ['billig/frukost', 'f'], ['grot', 'f'], ['billig/husmanskost', 'lm'], ['billig/gryta', 'lm'], ['billig/soppa', 'lm'], ['billig/pasta', 'lm'], ['billig/kottfarssas', 'lm'], ['billig/stroganoff', 'lm'], ['billig/omelett', 'lm'], ['billig/pyttipanna', 'lm'], ['billig/tacos', 'lm'], ['billig/wraps', 'l'], ['billig/risotto', 'lm'], ['billig/kottbullar', 'lm'], ['billig/chili-con-carne', 'lm'], ['billig/gratang', 'lm'], ['billig/paj', 'lm'], ['billig/pannkakor', 'lm'], ['billig/sallad', 'l'], ['billig', 'lm'], ['vardagsmat', 'lm'], ['snabb-mat', 'lm']];
+  const cats = [['notkott', 'lm'], ['kottfars', 'lm'], ['biff', 'lm'], ['pannbiff', 'lm'], ['kalops', 'lm'], ['gryta', 'lm'], ['lasagne', 'lm'], ['hamburgare', 'lm'], ['fisk', 'lm'], ['lax', 'lm'], ['torsk', 'lm'], ['fiskgryta', 'lm'], ['rakor', 'lm'], ['fisk-och-skaldjur', 'lm'], ['frukost', 'f'], ['billig/frukost', 'f'], ['grot', 'f'], ['billig/husmanskost', 'lm'], ['billig/gryta', 'lm'], ['billig/soppa', 'lm'], ['billig/pasta', 'lm'], ['billig/kottfarssas', 'lm'], ['billig/stroganoff', 'lm'], ['billig/omelett', 'lm'], ['billig/pyttipanna', 'lm'], ['billig/tacos', 'lm'], ['billig/wraps', 'l'], ['billig/risotto', 'lm'], ['billig/kottbullar', 'lm'], ['billig/chili-con-carne', 'lm'], ['billig/gratang', 'lm'], ['billig/paj', 'lm'], ['billig/pannkakor', 'lm'], ['billig/sallad', 'l'], ['vardagsmat', 'lm']];
   const found = new Map();
   for (const [c, t] of cats) {
     const h = await get('https://www.ica.se/recept/' + c + '/');
@@ -79,7 +79,7 @@ async function ica() {
 }
 
 async function lidl() {
-  const pages = [['urval/kategori/snabbt-och-enkelt', 'lm'], ['urval/kategori/middag', 'lm'], ['urval/kategori/vardagsmat', 'lm'], ['urval/kategori/frukost', 'f'], ['urval/kategori/vegetariskt', 'lm'], ['urval/kategori/husmanskost', 'lm']];
+  const pages = [['urval/kategori/kott', 'lm'], ['urval/kategori/notkott', 'lm'], ['urval/kategori/fisk-och-skaldjur', 'lm'], ['urval/kategori/fisk', 'lm'], ['urval/kategori/husmanskost', 'lm'], ['urval/kategori/middag', 'lm'], ['urval/kategori/vardagsmat', 'lm'], ['urval/kategori/snabbt-och-enkelt', 'lm'], ['urval/kategori/frukost', 'f']];
   const found = new Map();
   for (const [c, t] of pages) {
     const h = await get('https://recept.lidl.se/' + c); if (!h) continue;
@@ -97,7 +97,7 @@ async function lidl() {
 }
 
 async function linas() {
-  const cats = ['svenska', 'gryta', 'soppa', 'kott', 'fagel', 'fisk', 'vegetarian', 'asiatiska'];
+  const cats = ['kott', 'fisk', 'skaldjur', 'svenska', 'gryta', 'fagel', 'soppa', 'asiatiska'];
   const found = new Set();
   for (const c of cats) for (let pg = 1; pg <= 2; pg++) {
     const h = await get(`https://www.linasmatkasse.se/receptbank/${c}${pg > 1 ? '?page=' + pg : ''}`); if (!h) break;
@@ -160,6 +160,60 @@ function jsObjectToJson(src) {
   return src.replace(/new Map\(\[[^\]]*\]\)/g, '{}').replace(/new Set\(\[[^\]]*\]\)/g, '[]').replace(/:\s*undefined/g, ':null').replace(/new Date\(([^)]*)\)/g, '$1');
 }
 
+const BAD_OFFER = /,|röra|röror|marin|wienerbröd|chips|kryddad|margarin|bulle|kaka|smoothie|godis|choklad|glass|läsk|pant|blommor|rosor|ljus|tvätt|papper|schampo|kaffe|energidryck|proteinshake|pizzakit|pinsa|nutella/i;
+function offerProduct(name) {
+  if (!name || BAD_OFFER.test(name)) return null;
+  const p = matchProduct(name); if (!p) return null;
+  const first = name.split(' ').slice(0, 3).join(' ');
+  return new RegExp(p.re, 'i').test(first) || new RegExp(p.kw, 'i').test(name.split(' ')[0]) ? p : null;
+}
+const num = s => parseFloat(String(s || '').replace(/[^0-9,.-]/g, '').replace(',', '.'));
+
+async function willysOffers() {
+  const all = [];
+  for (let page = 0; page < 4; page++) {
+    const j = await get(`https://www.willys.se/search/campaigns/offline?q=2114&type=PERSONAL_GENERAL&page=${page}&size=100`, { json: true });
+    if (!j || !j.results || !j.results.length) break;
+    all.push(...j.results);
+    if (page + 1 >= (j.pagination?.numberOfPages || 1)) break;
+  }
+  const list = [];
+  for (const x of all) {
+    const pr = (x.potentialPromotions || [])[0]; if (!pr) continue;
+    const ord = num(x.price), qty = pr.qualifyingCount || 1, val = num(pr.rewardLabel) || pr.price;
+    const per = val / (/för/.test(pr.conditionLabel || '') ? qty : 1);
+    const ratio = ord > 0 && per > 0 ? per / ord : null;
+    const p = offerProduct(x.name);
+    list.push({ n: x.name, t: `${pr.conditionLabel ? pr.conditionLabel + ' ' : ''}${pr.rewardLabel || ''}${/kg/.test(x.priceUnit) ? '' : ''}`.trim() + (pr.redeemLimitLabel ? ` · ${pr.redeemLimitLabel}` : ''), ord: x.price, r: ratio && ratio < 0.97 && ratio > 0.2 ? Math.round(ratio * 1000) / 1000 : null, pid: p ? p.id : null, img: x.image?.url || x.thumbnail?.url || null, until: pr.endDate || '', plus: pr.campaignType === 'LOYALTY' ? 1 : 0, w: pr.weightVolume || '' });
+  }
+  log('Willys Katrinelund erbjudanden', list.length, 'matchade', list.filter(o => o.pid && o.r).length);
+  return list;
+}
+
+function unesc(s) { return s.replace(/&quot;/g, '"').replace(/&#34;/g, '"').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>'); }
+async function lidlOffers() {
+  const home = await get('https://www.lidl.se/'); if (!home) return [];
+  const links = uniq([...home.matchAll(/\/c\/store\/([a-z0-9-]+)\/a(\d+)/g)].filter(m => /frukt|mandag|tisdag|onsdag|torsdag|fredag|lidl-plus-erbjudanden|superklipp|kott|fisk/.test(m[1])).map(m => `/c/store/${m[1]}/a${m[2]}`));
+  const list = [], seen = new Set();
+  for (const l of links.slice(0, 12)) {
+    const h = await get('https://www.lidl.se' + l); if (!h) continue;
+    for (const m of h.matchAll(/data-grid-data="([^"]+)"/g)) {
+      let d; try { d = JSON.parse(unesc(m[1])); } catch { continue; }
+      const title = d.fullTitle || d.title; if (!title || seen.has(title)) continue;
+      const rp = d.regionsPrices ? Object.values(d.regionsPrices)[0] : null;
+      const cp = rp?.currentPrice?.price || rp?.currentLidlPlusPrice?.price || d.price;
+      if (!cp || !(cp.price > 0)) continue;
+      const old = cp.oldPrice || cp.discount?.deletedPrice || null;
+      const unit = cp.basePrice?.text || cp.packaging?.text || '';
+      const p = offerProduct(title);
+      seen.add(title);
+      list.push({ n: title, t: `${String(cp.price).replace('.', ',')} kr${unit && /\/(kg|st)/.test(unit) ? unit : ''}`, ord: old ? String(old).replace('.', ',') + ' kr' : '', r: old && cp.price < old ? Math.round(cp.price / old * 1000) / 1000 : null, pid: p ? p.id : null, img: d.image || d.imageList_V1?.[0]?.image || null, until: (cp.endDate || '').slice(0, 10), plus: rp?.currentLidlPlusPrice ? 1 : 0, w: d.keyfacts?.supplementalDescription || '' });
+    }
+  }
+  log('Lidl erbjudanden', list.length, 'matchade', list.filter(o => o.pid && o.r).length);
+  return list;
+}
+
 async function icaOffers() {
   const url = 'https://www.ica.se/erbjudanden/ica-supermarket-varnhem-1004543/';
   const h = await get(url); if (!h) return { ok: false };
@@ -167,29 +221,29 @@ async function icaOffers() {
   if (!m) return { ok: false };
   let d; try { d = JSON.parse(jsObjectToJson(m[1].trim().replace(/;\s*$/, ''))); } catch (e) { log('ICA erbjudanden: kunde inte tolka', e.message); return { ok: false }; }
   const list = d?.offers?.weeklyOffers || [];
-  const out = {};
+  const out = {}; const all = [];
   for (const o of list) {
     const name = [o.details?.name, o.details?.brand].filter(Boolean).join(' ');
     const on = o.details?.name || '';
     if (/,|röra|röror|marin|wienerbröd|chips|kryddad|margarin|bulle|kaka|smoothie|dryck(?!.*havre)/i.test(on)) continue;
-    const p = matchProduct(on); if (!p || !new RegExp(p.re, 'i').test(on.split(' ').slice(0, 3).join(' ')) && !new RegExp(p.kw, 'i').test(on.split(' ')[0])) continue;
+    const p = offerProduct(on);
     const pm = o.parsedMechanics || {};
     const reg = parseFloat(String(o.stores?.[0]?.regularPrice || '').replace(',', '.'));
     const val = parseFloat(String(pm.value2 || '').replace(',', '.'));
     const qty = +pm.quantity || 1;
-    if (!(reg > 0) || !(val > 0) || pm.benefitType !== 'FIXED') continue;
-    const ratio = val / qty / reg;
-    if (ratio >= 0.97 || ratio < 0.2) continue;
     const img = o.picture ? `${o.picture.baseUrl}/q_auto,f_auto/c_lpad,h_200,w_200/${o.picture.fileName}.jpg` : null;
+    const ratio = reg > 0 && val > 0 && pm.benefitType === 'FIXED' ? val / qty / reg : null;
+    all.push({ n: on, t: o.details?.mechanicInfo || '', ord: o.stores?.[0]?.regularPrice ? o.stores[0].regularPrice + ' kr' : '', r: ratio && ratio < 0.97 && ratio > 0.2 ? Math.round(ratio * 1000) / 1000 : null, pid: p ? p.id : null, img, until: (o.validTo || '').slice(0, 10), plus: (o.traits || []).includes('Stammis') ? 1 : 0, w: o.details?.packageInformation || '' });
+    if (!p || !ratio || ratio >= 0.97 || ratio < 0.2) continue;
     if (!out[p.id] || ratio < out[p.id].ratio) out[p.id] = { ratio: Math.round(ratio * 1000) / 1000, text: `${o.details?.name} ${o.details?.mechanicInfo || ''} (ord. ${o.stores?.[0]?.regularPrice} kr)`.trim(), until: (o.validTo || '').slice(0, 10), img };
   }
   log('ICA Värnhem erbjudanden', list.length, 'matchade', Object.keys(out).length);
-  return { ok: true, total: list.length, items: out };
+  return { ok: true, total: list.length, items: out, all };
 }
 
 // ---------- Kör ----------
 const t0 = Date.now();
-const [prices, offersIca, rIca, rLidl, rLinas, rSeed] = await Promise.all([willys(), icaOffers(), ica(), lidl(), linas(), seeded()]);
+const [prices, offersIca, offWillys, offLidl, rIca, rLidl, rLinas, rSeed] = await Promise.all([willys(), icaOffers(), willysOffers(), lidlOffers(), ica(), lidl(), linas(), seeded()]);
 let recipes = [...rIca, ...rLidl, ...rLinas, ...rSeed].filter(r => r && r.i.length >= 2 && r.cover >= 60 && r.n);
 const seen = new Set(); recipes = recipes.filter(r => !seen.has(r.id) && seen.add(r.id));
 const products = CATALOG.filter(p => prices[p.id]).map(p => ({ id: p.id, n: p.n, c: p.c, unit: p.unit, base: p.base ? 1 : 0, pk: prices[p.id].pk, price: prices[p.id].price, wn: prices[p.id].name, loose: prices[p.id].loose ? 1 : 0, promo: prices[p.id].promo || '' }));
@@ -197,24 +251,26 @@ const have = new Set(products.map(p => p.id));
 const PP = Object.fromEntries(products.map(p => [p.id, p]));
 const perPortion = r => r.i.reduce((t, [id, a]) => PP[id] ? t + a / r.p / PP[id].pk * PP[id].price : t, 0);
 recipes = recipes.filter(r => r.i.every(([id]) => have.has(id)) || (r.i = r.i.filter(([id]) => have.has(id))).length >= 2);
-recipes = recipes.filter(r => { const c = perPortion(r); r.pp = Math.round(c * 10) / 10; return c > 0.5 && c <= 90; });
+recipes = recipes.filter(r => { const c = perPortion(r); r.pp = Math.round(c * 10) / 10; return c > 0.5 && c <= 110; });
 
 let old = null; try { old = JSON.parse(await fs.readFile('data/data.json', 'utf8')); } catch { }
 if (products.length < 40 || recipes.length < 30) {
   log('För lite data hämtades (produkter', products.length, 'recept', recipes.length + '). Behåller förra filen.');
   if (old) process.exit(0); else process.exit(1);
 }
+function toMap(list) { const m = {}; for (const o of list) if (o.pid && o.r && (!m[o.pid] || o.r < m[o.pid].ratio)) m[o.pid] = { ratio: o.r, text: `${o.n} ${o.t}${o.ord ? ' (ord. ' + o.ord + ')' : ''}`, until: o.until, img: o.img }; return m; }
 const data = {
   updated: new Date().toISOString(),
   stores: {
-    willys: { n: 'Willys Katrinelund', addr: 'Celsiusgatan 38', how: 'Willys hyllpriser från willys.se (samma i hela landet)' },
-    lidl: { n: 'Lidl Knivgatan', addr: 'Knivgatan 1B', how: 'Uppskattat: Willys-pris × 0,97 (Lidl visar inga priser på nätet)', f: 0.97 },
-    ica: { n: 'ICA Supermarket Värnhem', addr: 'Värnhem', how: 'Uppskattat: Willys-pris × 1,07 enligt PRO:s prisundersökning, plus butikens egna veckoerbjudanden', f: 1.07 },
-    coop: { n: 'Coop Värnhem', addr: 'Föreningsgatan 72', how: 'Uppskattat: Willys-pris × 1,08', f: 1.08 },
+    willys: { n: 'Willys Katrinelund', addr: 'Celsiusgatan 38', how: 'Willys hyllpriser från willys.se (samma i hela landet), plus butikens veckoerbjudanden', url: 'https://www.willys.se/erbjudanden/butik' },
+    lidl: { n: 'Lidl Knivgatan', addr: 'Knivgatan 1B', how: 'Uppskattat: Willys-pris × 0,97 (Lidl visar inga ordinarie priser på nätet), plus veckans erbjudanden (samma i alla Lidl-butiker)', f: 0.97, url: 'https://www.lidl.se/c/reklamblad/s10018018' },
+    ica: { n: 'ICA Supermarket Värnhem', addr: 'Värnhem', how: 'Uppskattat: Willys-pris × 1,07 enligt PRO:s prisundersökning, plus butikens egna veckoerbjudanden', f: 1.07, url: 'https://www.ica.se/erbjudanden/ica-supermarket-varnhem-1004543/' },
+    coop: { n: 'Coop Värnhem', addr: 'Föreningsgatan 72', how: 'Uppskattat: Willys-pris × 1,08. Coops erbjudanden är låsta för andra appar och kan inte hämtas.', f: 1.08, url: 'https://www.coop.se/butiker-erbjudanden/coop/coop-varnhem/' },
   },
   cats: CATS,
   products,
-  offers: { ica: offersIca.ok ? offersIca.items : {} },
+  offers: { ica: offersIca.ok ? offersIca.items : {}, willys: toMap(offWillys), lidl: toMap(offLidl), coop: {} },
+  offerLists: { ica: offersIca.ok ? offersIca.all : [], willys: offWillys, lidl: offLidl, coop: [] },
   recipes,
   stats: { ica: rIca.length, lidl: rLidl.length, linas: rLinas.length, seed: rSeed.length, kept: recipes.length, secs: Math.round((Date.now() - t0) / 1000) },
 };

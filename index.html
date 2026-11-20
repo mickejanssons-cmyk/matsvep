@@ -190,6 +190,7 @@ input[type=number]{background:var(--soft);border:1px solid transparent;border-ra
 
   <section class="view" id="v-svep">
     <div class="pills" id="typePills"></div>
+    <div class="pills" id="proPills" style="margin-top:8px"></div>
     <div class="pills" id="srcPills" style="margin-top:8px"></div>
     <p class="slot" id="slot"></p>
     <div class="deck" id="deck"></div>
@@ -213,7 +214,8 @@ input[type=number]{background:var(--soft);border:1px solid transparent;border-ra
     <p class="mut small" style="margin-top:-6px">Vad din inköpslista kostar i butikerna nära Värnhem. Tryck för att välja.</p>
     <div class="stores" id="stores"></div>
     <div class="note" id="priceNote"></div>
-    <h3>Veckans erbjudanden på ICA Värnhem som finns i dina recept</h3>
+    <h3>Veckans erbjudanden</h3>
+    <div class="pills" id="offTabs"></div>
     <div id="offers"></div>
     <div class="note small" id="about"></div>
   </section>
@@ -245,13 +247,16 @@ const KEY='matsvep-web-v1';
 let D=null,P={},R=[],RID={};
 
 function defaults(){const en={};for(let d=0;d<7;d++){en[d+'f']=1;en[d+'m']=1;if(d>4)en[d+'l']=1}
-  return {budget:900,pers:2,store:'willys',en,plan:{},have:{},bought:{},rej:{f:[],l:[],m:[]},tab:'svep',type:'m',src:'Alla',over:false}}
+  return {budget:900,pers:2,store:'willys',en,plan:{},have:{},bought:{},rej:{f:[],l:[],m:[]},tab:'svep',type:'m',src:'Alla',over:false,pro:{not:1,fisk:1,kyck:1,flask:1,veg:0},offStore:null}}
 let S=defaults();
-try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o)S=Object.assign(S,o,{rej:Object.assign({f:[],l:[],m:[]},o.rej||{})})}catch(e){}
+try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o)S=Object.assign(S,o,{rej:Object.assign({f:[],l:[],m:[]},o.rej||{}),pro:Object.assign({not:1,fisk:1,kyck:1,flask:1,veg:0},o.pro||{})})}catch(e){}
+const PRO={not:'Nötkött',fisk:'Fisk',kyck:'Kyckling',flask:'Fläsk',veg:'Vegetariskt'};
+const PROID={not:['notfars','blandfars','hogrev','notbit'],fisk:['lax','torsk','rakor','tonfisk'],kyck:['kyckling','kycklinglar','kycklingklubba','kycklingfars'],flask:['flask','bacon','kotlett','flaskfile','falukorv','skinka','flaskfars']};
+function proOf(r){if(r.pro)return r.pro;const ids=new Set(r.i.map(x=>x[0]));const k=Object.keys(PROID).filter(k=>PROID[k].some(id=>ids.has(id)));return r.pro=k.length?k:['veg']}
 let sT;const save=()=>{clearTimeout(sT);sT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},150)};
 
 /* ---------- priser ---------- */
-function price(id,st){st=st||S.store;const p=P[id];if(!p)return 0;let v=p.price*(D.stores[st].f||1);if(st==='ica'){const o=D.offers.ica[id];if(o)v*=o.ratio}return v}
+function price(id,st){st=st||S.store;const p=P[id];if(!p)return 0;let v=p.price*(D.stores[st].f||1);const o=(D.offers[st]||{})[id];if(o)v*=o.ratio;return v}
 const rec=id=>RID[id];
 const planned=()=>Object.keys(S.plan).filter(k=>S.en[k]&&rec(S.plan[k])).sort();
 const planIds=()=>planned().map(k=>S.plan[k]);
@@ -305,13 +310,14 @@ let target=null,deck=[];const jit={};const J=id=>jit[id]??(jit[id]=.8+Math.rando
 function freeSlot(t){if(target&&target[1]===t&&S.en[target]&&!(S.plan[target]&&rec(S.plan[target])))return target;for(let d=0;d<7;d++){const k=d+t;if(S.en[k]&&!(S.plan[k]&&rec(S.plan[k])))return k}return null}
 function buildDeck(t){
   const ids=planIds(),base=kassa(ids),used=new Set(ids),inWeek=new Set(Object.keys(needs(ids)));
-  let c=R.filter(r=>(t==='f'?r.t.includes('f'):r.t.includes(t)||(r.t==='lm'))&&!(t!=='f'&&r.t==='f')&&!used.has(r.id)&&!S.rej[t].includes(r.id)&&(S.src==='Alla'||r.src===S.src));
-  c=c.map(r=>{const k2=kassa(ids.concat(r.id));return{r,marg:k2-base,fits:k2<=S.budget,share:r.i.filter(([id])=>inWeek.has(id)&&!P[id]?.base).length,offer:S.store==='ica'&&r.i.some(([id])=>D.offers.ica[id])}});
+  let c=R.filter(r=>(t==='f'?r.t.includes('f'):r.t.includes(t)||(r.t==='lm'))&&!(t!=='f'&&r.t==='f')&&!used.has(r.id)&&!S.rej[t].includes(r.id)&&(S.src==='Alla'||r.src===S.src)&&(t==='f'||proOf(r).some(k=>S.pro[k])));
+  c=c.map(r=>{const k2=kassa(ids.concat(r.id));return{r,marg:k2-base,fits:k2<=S.budget,share:r.i.filter(([id])=>inWeek.has(id)&&!P[id]?.base).length,offer:r.i.some(([id])=>(D.offers[S.store]||{})[id]),boost:proOf(r).some(k=>k==='not'||k==='fisk')?.75:1}});
   if(!S.over)c=c.filter(x=>x.fits);
-  return c.sort((a,b)=>(b.fits-a.fits)||(a.marg*J(a.r.id)-b.marg*J(b.r.id)));
+  return c.sort((a,b)=>(b.fits-a.fits)||(a.marg*a.boost*J(a.r.id)-b.marg*b.boost*J(b.r.id)));
 }
 function renderSvep(){
   $('#typePills').innerHTML=['f','l','m'].map(t=>{const tot=[0,1,2,3,4,5,6].filter(d=>S.en[d+t]).length,left=[0,1,2,3,4,5,6].filter(d=>S.en[d+t]&&!(S.plan[d+t]&&rec(S.plan[d+t]))).length;return `<button type="button" class="pill ${S.type===t?'on':''}" data-t="${t}" ${tot?'':'disabled'}>${TY[t]}${tot?' · '+left+' kvar':''}</button>`}).join('');
+  $('#proPills').innerHTML=S.type==='f'?'':Object.keys(PRO).map(k=>`<button type="button" class="pill ${S.pro[k]?'on':''}" data-p="${k}" aria-pressed="${!!S.pro[k]}">${PRO[k]}</button>`).join('');
   $('#srcPills').innerHTML=SRC.map(s=>`<button type="button" class="pill ${S.src===s?'on':''}" data-s="${s}">${s==='Alla'?'Alla recept':s}</button>`).join('');
   $('#showOver').checked=!!S.over;
   const t=S.type,slot=freeSlot(t),dk=$('#deck');$('#acts').style.visibility='hidden';
@@ -326,7 +332,7 @@ function renderSvep(){
 }
 function cardHtml(x,i){const r=x.r,pp=portion(r);const ch=[];
   if(x.share)ch.push(`<span class="chip g">Delar ${x.share} ${x.share>1?'varor':'vara'} med veckan</span>`);
-  if(x.offer)ch.push('<span class="chip y">Erbjudande på ICA</span>');
+  if(x.offer)ch.push(`<span class="chip y">Erbjudande på ${esc(D.stores[S.store].n.split(' ')[0])}</span>`);proOf(r).filter(k=>k!=='veg').forEach(k=>ch.push(`<span class="chip">${PRO[k]}</span>`));
   if(!x.fits)ch.push('<span class="chip r">Spräcker budgeten</span>');
   return `<article class="card ${i===1?'b1':i===2?'b2':''}" data-id="${r.id}" ${i===0?'tabindex="0"':''}><div class="ph"></div>${img(r)}<div class="grad"></div>
   <span class="srcb">${esc(r.src)}</span><div class="price"><span>vid kassan</span><b>+${kr(x.marg)}</b></div>
@@ -348,6 +354,7 @@ function decide(ok){if(busy)return;const c=$('#deck .card:last-child');if(!c)ret
 $('#yesBtn').onclick=()=>decide(true);$('#noBtn').onclick=()=>decide(false);
 $('#infoBtn').onclick=()=>{const c=$('#deck .card:last-child');if(c)openSheet(c.dataset.id,{deck:1})};
 $('#typePills').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b||b.disabled)return;S.type=b.dataset.t;target=null;save();renderSvep()});
+$('#proPills').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b)return;const k=b.dataset.p;S.pro[k]=S.pro[k]?0:1;if(!Object.values(S.pro).some(Boolean))S.pro[k]=1;save();renderSvep()});
 $('#srcPills').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;S.src=b.dataset.s;save();renderSvep()});
 $('#showOver').onchange=e=>{S.over=e.target.checked;save();renderSvep()};
 $('#deck').addEventListener('click',e=>{if(e.target.id==='resetRej'){S.rej[S.type]=[];save();renderSvep()}const g=e.target.closest('[data-go]');if(g)go(g.dataset.go)});
@@ -364,7 +371,7 @@ function renderList(){
   if(home.length)h+=`<div class="cat">Har hemma</div>`+home.map(x=>item(x,1)).join('');
   h+='<p class="small mut" style="margin-top:14px">Salt, peppar, kryddor och vatten räknas inte. Tryck "Har hemma" på det du redan har.</p>';
   $('#list').innerHTML=h}
-function item(x,home){const p=P[x.id],n=packs(x),rest=n*p.pk-x.a,o=S.store==='ica'&&D.offers.ica[x.id];
+function item(x,home){const p=P[x.id],n=packs(x),rest=n*p.pk-x.a,o=(D.offers[S.store]||{})[x.id];
   const buy=p.loose?(p.unit==='st'?n+' st':'ca '+amt(n*p.pk,p.unit)):(n+' × '+packLbl(p));
   return `<div class="item ${S.bought[x.id]&&!home?'done':''}">${home?'<span></span>':`<input type="checkbox" data-b="${x.id}" ${S.bought[x.id]?'checked':''} aria-label="Köpt ${esc(p.n)}">`}
   <div><div class="n">${esc(p.n)}${o?'<span class="off">Erbjudande</span>':''}</div><div class="d">Går åt ${amt(x.a,p.unit)}${home?'':' · köp '+buy+(rest>.01&&!p.loose?' · över '+amt(rest,p.unit):'')}</div><div class="d">${x.uses.map(esc).join(', ')}</div>
@@ -382,11 +389,18 @@ function renderStore(){
   const ids=planIds(),v=STORES.map(s=>({s,k:kassa(ids,s)})),mx=Math.max(...v.map(x=>x.k),1),mn=Math.min(...v.map(x=>x.k));
   $('#stores').innerHTML=v.map(x=>{const st=D.stores[x.s];return `<button type="button" class="st ${S.store===x.s?'on':''}" data-st="${x.s}"><span class="ic" style="background:${SCOL[x.s]}">${st.n.split(' ')[0].slice(0,4)}</span><span class="t"><b>${esc(st.n)}</b><small>${esc(st.addr||'')}</small>${ids.length?`<div class="bar"><i style="width:${(x.k/mx*100).toFixed(0)}%;${x.k===mn?'':'opacity:.4'}"></i></div>`:''}</span><span class="v">${ids.length?kr(x.k):'–'}<small>${x.k===mn&&ids.length?'billigast':''}</small></span></button>`}).join('');
   $('#priceNote').innerHTML=STORES.map(s=>`<b>${esc(D.stores[s].n)}:</b> ${esc(D.stores[s].how)}`).join('<br>');
-  const used=new Set(Object.keys(needs(R.map(r=>r.id))));const o=Object.entries(D.offers.ica||{}).filter(([id])=>P[id]);
-  $('#offers').innerHTML=o.length?o.map(([id,x])=>`<div class="ofr">${x.img?`<img src="${esc(x.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">`:'<span></span>'}<div><b>${esc(P[id].n)}</b> – ${Math.round((1-x.ratio)*100)} % billigare<div class="small mut">${esc(x.text)}${x.until?' · t.o.m. '+x.until:''}</div></div></div>`).join(''):'<p class="mut small">Inga matchande erbjudanden just nu.</p>';
+  const os=S.offStore||S.store,st=D.stores[os],lst=(D.offerLists&&D.offerLists[os])||[];
+  $('#offTabs').innerHTML=STORES.map(k=>`<button type="button" class="pill ${os===k?'on':''}" data-o="${k}">${esc(D.stores[k].n.split(' ')[0])}</button>`).join('');
+  const inRec=lst.filter(o=>o.pid&&o.r&&P[o.pid]),other=lst.filter(o=>!(o.pid&&o.r&&P[o.pid]));
+  const row=o=>`<div class="ofr">${o.img?`<img src="${esc(o.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">`:'<span></span>'}<div><b>${esc(o.n)}</b>${o.r?` <span class="off">−${Math.round((1-o.r)*100)} %</span>`:''}<div class="small mut">${esc(o.t)}${o.ord?' · ord. '+esc(o.ord):''}${o.w?' · '+esc(o.w):''}${o.plus?' · kräver '+(os==='ica'?'Stammis':os==='lidl'?'Lidl Plus':'Willys Plus'):''}${o.until?' · t.o.m. '+esc(o.until):''}</div></div></div>`;
+  $('#offers').innerHTML=!lst.length?`<p class="mut small">${os==='coop'?'Coop Värnhems erbjudanden är låsta för andra appar, så de kan inte visas här.':'Inga erbjudanden hämtade just nu.'} <a href="${esc(st.url||'#')}" target="_blank" rel="noopener" style="color:var(--green);font-weight:700">Öppna ${esc(st.n)}s erbjudanden</a></p>`
+   :(inRec.length?`<p class="small" style="font-weight:800;margin:10px 0 2px">Sänker priset i dina recept (${inRec.length})</p>`+inRec.map(row).join(''):'')
+   +`<details style="margin-top:10px"><summary style="font-weight:700;cursor:pointer;min-height:36px">Alla erbjudanden (${other.length})</summary>${other.slice(0,200).map(row).join('')}</details>`
+   +(st.url?`<p class="small"><a href="${esc(st.url)}" target="_blank" rel="noopener" style="color:var(--green);font-weight:700">Se allt på ${esc(st.n.split(' ')[0])}s sajt</a></p>`:'');
   const d=new Date(D.updated);$('#about').innerHTML=`Uppdaterad ${d.toLocaleDateString('sv-SE')} kl ${d.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'})}. ${R.length} recept (${['ICA','Lidl','Linas','Coop','Willys'].map(s=>s+' '+R.filter(r=>r.src===s).length).join(', ')}). ${D.products.length} varor med Willys-pris. Bilder och recept tillhör respektive sajt; tryck på ett recept för att öppna originalet.`;
 }
-$('#stores').addEventListener('click',e=>{const b=e.target.closest('[data-st]');if(!b)return;S.store=b.dataset.st;save();render()});
+$('#stores').addEventListener('click',e=>{const b=e.target.closest('[data-st]');if(!b)return;S.store=b.dataset.st;S.offStore=null;save();render()});
+$('#offTabs').addEventListener('click',e=>{const b=e.target.closest('[data-o]');if(!b)return;S.offStore=b.dataset.o;save();renderStore()});
 $('#storeBtn').onclick=()=>go('butik');
 
 /* ---------- sheet ---------- */

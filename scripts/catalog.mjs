@@ -92,6 +92,7 @@ export const CATALOG = [
   { id: 'flaskfile', n: 'Fläskfilé', c: 'ko', unit: 'g', q: 'fläskfilé', re: '^Fläskfilé|^Fläskytterfilé', max: 1000, kw: 'fläskfilé|fläskytterfilé|fläskkarré|karré', ex: 'gryta|Gryta' },
   { id: 'falukorv', n: 'Falukorv', c: 'ko', unit: 'g', q: 'falukorv', re: '^Falukorv', max: 800, kw: 'falukorv|kycklingstekkorv|kycklingkorv|stekkorv|korv|prinskorv|grillkorv|frukostkorv|chorizo|salsiccia' },
   { id: 'skinka', n: 'Skinka', c: 'ko', unit: 'g', q: 'rökt skinka', re: 'Skinka', max: 300, kw: 'skinka|kassler', pc: 15 },
+  { id: 'notbit', n: 'Nötkött (biff/stek)', c: 'ko', unit: 'g', q: 'ryggbiff', re: 'Ryggbiff|Entrecôte|Flankstek|Lövbiff|Rostbiff|Oxfilé|Flapsteak|Nötkött', ex: 'Hamburgare|Färs', max: 1000, kw: 'ryggbiff|entrecôte|entrecote|oxfilé|flankstek|lövbiff|rostbiff|nötfilé|flapsteak|minutfilé|innanlår|fransyska|bavette|\\bbiff\\b|biffar|skav|nötstek|steak' },
   { id: 'hogrev', n: 'Högrev/grytbitar', c: 'ko', unit: 'g', q: 'högrev', re: '^Högrev', max: 1300, kw: 'högrev|grytbitar|nötkött' },
   { id: 'lax', n: 'Laxfilé', c: 'fr', unit: 'g', q: 'laxfilé fryst', re: 'Laxfilé', max: 1000, kw: '\\blax|laxfilé', pc: 125 },
   { id: 'torsk', n: 'Vit fisk (torsk/sej)', c: 'fr', unit: 'g', q: 'torskfilé fryst', re: 'Torsk|Sej|Kolja|Alaska', max: 1000, kw: 'torsk|sej|kolja|vit fisk|fiskfilé|pollock|rödspätta|spätta|fiskpinnar', pc: 125 },
