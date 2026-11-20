@@ -160,7 +160,7 @@ function jsObjectToJson(src) {
   return src.replace(/new Map\(\[[^\]]*\]\)/g, '{}').replace(/new Set\(\[[^\]]*\]\)/g, '[]').replace(/:\s*undefined/g, ':null').replace(/new Date\(([^)]*)\)/g, '$1');
 }
 
-const BAD_OFFER = /,|röra|röror|marin|wienerbröd|chips|kryddad|margarin|bulle|kaka|smoothie|godis|choklad|glass|läsk|pant|blommor|rosor|ljus|tvätt|papper|schampo|kaffe|energidryck|proteinshake|pizzakit|pinsa|nutella/i;
+const BAD_OFFER = /,|röra|röror|marin|wienerbröd|chips|kryddad|margarin|bulle|kaka|smoothie|godis|choklad|glass|läsk|pant|blommor|rosor|ljus|tvätt|papper|schampo|kaffe|energidryck|proteinshake|pizzakit|pinsa|nutella|salladsbar|julskinka|kebab|fiskpinnar|lingonbröd|köttbullar|panerad|gratäng|pytt|pizza|paj|soppa|färdigrätt|grillad|sallad med|wrap|burgare|nuggets/i;
 function offerProduct(name) {
   if (!name || BAD_OFFER.test(name)) return null;
   const p = matchProduct(name); if (!p) return null;
@@ -207,7 +207,7 @@ async function lidlOffers() {
       const unit = cp.basePrice?.text || cp.packaging?.text || '';
       const p = offerProduct(title);
       seen.add(title);
-      list.push({ n: title, t: `${String(cp.price).replace('.', ',')} kr${unit && /\/(kg|st)/.test(unit) ? unit : ''}`, ord: old ? String(old).replace('.', ',') + ' kr' : '', r: old && cp.price < old ? Math.round(cp.price / old * 1000) / 1000 : null, pid: p ? p.id : null, img: d.image || d.imageList_V1?.[0]?.image || null, until: (cp.endDate || '').slice(0, 10), plus: rp?.currentLidlPlusPrice ? 1 : 0, w: d.keyfacts?.supplementalDescription || '' });
+      list.push({ n: title, t: `${String(cp.price).replace('.', ',')} kr${/^\//.test(unit) ? unit : ''}${unit && !/^\//.test(unit) ? ' (jfr ' + unit + ')' : ''}`, ord: old ? String(old).replace('.', ',') + ' kr' : '', r: old && cp.price < old ? Math.round(cp.price / old * 1000) / 1000 : null, pid: p ? p.id : null, img: d.image || d.imageList_V1?.[0]?.image || null, until: (cp.endDate || '').slice(0, 10), plus: rp?.currentLidlPlusPrice ? 1 : 0, w: d.keyfacts?.supplementalDescription || '' });
     }
   }
   log('Lidl erbjudanden', list.length, 'matchade', list.filter(o => o.pid && o.r).length);
