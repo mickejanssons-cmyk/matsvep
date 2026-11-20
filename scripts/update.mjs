@@ -17,7 +17,7 @@ async function get(url, { json = false, tries = 3 } = {}) {
       if (r.status === 404) return null;
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return json ? await r.json() : await r.text();
-    } catch (e) { if (i === tries - 1) { log('FEL', url, e.message); return null; } await sleep(1500 * (i + 1)); }
+    } catch (e) { if (i === tries - 1) { log('FEL', url, e.message); return null; } await sleep((/403|429/.test(e.message) ? 8000 : 1500) * (i + 1)); }
   }
 }
 async function pool(items, n, fn) {
@@ -68,7 +68,8 @@ async function ica() {
   }
   const ids = [...found.keys()].slice(0, LIMIT.ica);
   log('ICA recept', ids.length);
-  const out = await pool(ids, 4, async id => {
+  const out = await pool(ids, 1, async id => {
+    await sleep(700);
     const url = 'https://www.ica.se/recept/' + id + '/';
     const h = await get(url); if (!h) return null;
     const r = ldRecipe(h); if (!r || !r.recipeIngredient) return null;
