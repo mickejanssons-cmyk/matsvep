@@ -37,7 +37,7 @@ export function matchProduct(text) {
 }
 
 export function parseLine(raw, servings) {
-  let s = raw.trim().replace(/\s+/g, ' ').replace(/^ca\.?\s+/i, '');
+  let s = raw.trim().replace(/\s+/g, ' ').replace(/(^|\s|-)ca\.?\s+/gi, '$1');
   const lower = s.toLowerCase();
   // förpackningsvikt "(à 390 g)" / "à 120 g"
   let pkg = null;
@@ -82,6 +82,7 @@ export function parseLine(raw, servings) {
   if (p.id === 'agg' && /äggul|äggvit/.test(lower)) amt = q; // en äggula = ett ägg
   if (p.id === 'orter') amt = Math.min(1, amt || 1);
   if (!(amt > 0)) return { raw, id: p.id, amt: null, note: 'kunde inte räkna' };
+  if (amt > (p.max || 1000) * 6) return { raw, id: p.id, amt: null, note: 'orimlig mängd' };
   return { raw, id: p.id, amt: Math.round(amt * 100) / 100 };
 }
 

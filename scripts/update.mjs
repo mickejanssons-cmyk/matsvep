@@ -37,7 +37,7 @@ function ldRecipe(html) {
   return null;
 }
 const imgOf = im => { if (!im) return null; if (typeof im === 'string') return im; if (Array.isArray(im)) return imgOf(im[im.length > 1 ? 1 : 0]); return im.url || im.contentUrl || null; };
-const ogImage = html => (html && (html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)/i) || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image/i) || [])[1]) || null;
+const ogImage = html => (html && (html.match(/<meta[^>]+(?:property|name)=["']og:image["'][^>]+content=["']([^"']+)/i) || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']og:image/i) || [])[1]) || null;
 const minutes = t => { const m = String(t || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?/); return m ? (+(m[1] || 0) * 60 + +(m[2] || 0)) || null : null; };
 const clean = s => String(s || '').replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 
@@ -128,7 +128,7 @@ function packOf(item, unit) {
   if (/kr\/kg/.test(item.priceUnit) && item.averageWeight) return unit === 'st' ? 1 : item.averageWeight * 1000;
   let m = v.match(/^(\d+)x(\d+(?:\.\d+)?)(g|kg|ml|cl|dl|l)$/);
   const conv = (n, u) => n * ({ g: 1, kg: 1000, ml: 1, cl: 10, dl: 100, l: 1000 }[u] || 1);
-  if (unit === 'st') { m = v.match(/(\d+)(?:p|-pack|st)/); return m ? +m[1] : 1; }
+  if (unit === 'st') { m = (v + ' ' + String(item.name || '').toLowerCase()).match(/(\d+)\s?(?:p\b|-pack|pack|st\b)/); return m ? +m[1] : 1; }
   if (m) return +m[1] * conv(+m[2], m[3]);
   m = v.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)(g|kg)$/); if (m) return conv(+m[2], m[3]); // avrunnen vikt
   m = v.match(/^(?:ca:?)?(\d+(?:\.\d+)?)(g|kg|ml|cl|dl|l)$/); if (m) return conv(+m[1], m[2]);
@@ -140,8 +140,8 @@ async function willys() {
   await pool(CATALOG, 3, async p => {
     const j = await get('https://www.willys.se/search?q=' + encodeURIComponent(p.q) + '&size=30', { json: true });
     if (!j || !j.results) return;
-    const re = new RegExp(p.re);
-    const cands = j.results.filter(x => re.test(x.name) && x.priceValue > 0 && !x.outOfStock).map(x => {
+    const re = new RegExp(p.re), ex = p.ex ? new RegExp(p.ex) : null;
+    const cands = j.results.filter(x => re.test(x.name) && !(ex && ex.test(x.name)) && x.priceValue > 0 && !x.outOfStock).map(x => {
       const pk = packOf(x, p.unit);
       const price = /kr\/kg/.test(x.priceUnit) && x.averageWeight ? x.priceValue * x.averageWeight : x.priceValue;
       return pk ? { name: x.name + (x.displayVolume ? ' ' + x.displayVolume : ''), pk, price: Math.round(price * 100) / 100, per: price / pk, loose: /kr\/kg/.test(x.priceUnit), promo: (x.potentialPromotions || []).map(q => q.conditionLabel || q.rewardLabel || '').filter(Boolean).join(', ') } : null;
@@ -169,7 +169,9 @@ async function icaOffers() {
   const out = {};
   for (const o of list) {
     const name = [o.details?.name, o.details?.brand].filter(Boolean).join(' ');
-    const p = matchProduct(o.details?.name || ''); if (!p) continue;
+    const on = o.details?.name || '';
+    if (/,|röra|röror|marin|wienerbröd|chips|kryddad|margarin|bulle|kaka|smoothie|dryck(?!.*havre)/i.test(on)) continue;
+    const p = matchProduct(on); if (!p || !new RegExp(p.re, 'i').test(on.split(' ').slice(0, 3).join(' ')) && !new RegExp(p.kw, 'i').test(on.split(' ')[0])) continue;
     const pm = o.parsedMechanics || {};
     const reg = parseFloat(String(o.stores?.[0]?.regularPrice || '').replace(',', '.'));
     const val = parseFloat(String(pm.value2 || '').replace(',', '.'));
@@ -191,7 +193,10 @@ let recipes = [...rIca, ...rLidl, ...rLinas, ...rSeed].filter(r => r && r.i.leng
 const seen = new Set(); recipes = recipes.filter(r => !seen.has(r.id) && seen.add(r.id));
 const products = CATALOG.filter(p => prices[p.id]).map(p => ({ id: p.id, n: p.n, c: p.c, unit: p.unit, base: p.base ? 1 : 0, pk: prices[p.id].pk, price: prices[p.id].price, wn: prices[p.id].name, loose: prices[p.id].loose ? 1 : 0, promo: prices[p.id].promo || '' }));
 const have = new Set(products.map(p => p.id));
+const PP = Object.fromEntries(products.map(p => [p.id, p]));
+const perPortion = r => r.i.reduce((t, [id, a]) => PP[id] ? t + a / r.p / PP[id].pk * PP[id].price : t, 0);
 recipes = recipes.filter(r => r.i.every(([id]) => have.has(id)) || (r.i = r.i.filter(([id]) => have.has(id))).length >= 2);
+recipes = recipes.filter(r => { const c = perPortion(r); r.pp = Math.round(c * 10) / 10; return c > 0.5 && c <= 90; });
 
 let old = null; try { old = JSON.parse(await fs.readFile('data/data.json', 'utf8')); } catch { }
 if (products.length < 40 || recipes.length < 30) {
