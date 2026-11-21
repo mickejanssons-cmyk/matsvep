@@ -331,7 +331,7 @@ function renderSvep(){
   const left=S.budget-kassa(planIds()),emptyN=Object.keys(S.en).filter(k=>S.en[k]&&!(S.plan[k]&&rec(S.plan[k]))).length;
   $('#slot').innerHTML=`<b>${DAYS[+slot[0]]} · ${TY[t].toLowerCase()}</b> · ${left>=0?kr(left)+' kvar, ca '+kr(left/Math.max(1,emptyN))+' per måltid':'redan över budget'}`;
   deck=buildDeck(t);
-  if(!deck.length){dk.innerHTML=`<div class="empty"><h2>Slut på förslag</h2><p class="mut">${S.over?'Du har svept igenom alla recept här.':'Inga fler recept ryms i budgeten.'}</p><button class="btn pri" type="button" id="resetRej">Visa bortsvepta igen</button></div>`;return}
+  if(!deck.length){dk.innerHTML=`<div class="empty"><h2>Slut på förslag</h2><p class="mut">${S.rej[t].length?'Du har svept igenom alla förslag här.':'Inga fler recept ryms i budgeten.'}</p><button class="btn pri" type="button" id="resetRej">Visa bortsvepta igen</button></div>`;return}
   $('#acts').style.visibility='visible';
   dk.innerHTML=deck.slice(0,3).map((x,i)=>cardHtml(x,i)).reverse().join('');bindTop();
 }
