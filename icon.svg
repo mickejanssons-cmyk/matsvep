@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<defs>
+  <radialGradient id="bg" cx="40%" cy="30%" r="85%"><stop offset="0" stop-color="#3a9a66"/><stop offset=".55" stop-color="#1f6b45"/><stop offset="1" stop-color="#0f3d27"/></radialGradient>
+  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="26"/><feOffset dy="28"/><feComponentTransfer><feFuncA type="linear" slope=".45"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="sh2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="10"/><feOffset dy="10"/><feComponentTransfer><feFuncA type="linear" slope=".35"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="3"/></filter>
+  <linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#f1ede4"/></linearGradient>
+  <linearGradient id="card2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9e3d6"/><stop offset="1" stop-color="#d6cfbf"/></linearGradient>
+  <radialGradient id="plate" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#ffffff"/><stop offset=".8" stop-color="#f3f1ec"/><stop offset="1" stop-color="#dcd8cf"/></radialGradient>
+  <radialGradient id="well" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="#fbfaf7"/><stop offset="1" stop-color="#ebe7df"/></radialGradient>
+  <linearGradient id="salmon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffab7a"/><stop offset=".5" stop-color="#f27a45"/><stop offset="1" stop-color="#c9502a"/></linearGradient>
+  <radialGradient id="tom" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#ff8a6e"/><stop offset=".45" stop-color="#e32f1c"/><stop offset="1" stop-color="#8e1608"/></radialGradient>
+  <radialGradient id="pot" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff0b8"/><stop offset=".5" stop-color="#e9c262"/><stop offset="1" stop-color="#b8862e"/></radialGradient>
+  <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fd65a"/><stop offset=".6" stop-color="#4f9a2c"/><stop offset="1" stop-color="#2d6b1a"/></linearGradient>
+  <radialGradient id="lemon" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff6b0"/><stop offset=".75" stop-color="#ffe14a"/><stop offset=".9" stop-color="#f5f0d0"/><stop offset="1" stop-color="#e8c21a"/></radialGradient>
+  <radialGradient id="heart" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#4fd08a"/><stop offset="1" stop-color="#1c8a4f"/></radialGradient>
+  <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="1024" height="1024" fill="url(#bg)"/>
+<ellipse cx="300" cy="180" rx="420" ry="260" fill="#fff" opacity=".06"/>
+<!-- bakre kort -->
+<g transform="rotate(-13 512 540)" filter="url(#sh)"><rect x="262" y="238" width="500" height="620" rx="78" fill="url(#card2)"/></g>
+<!-- främre kort -->
+<g transform="rotate(7 512 520)">
+  <g filter="url(#sh)"><rect x="252" y="200" width="520" height="640" rx="80" fill="url(#card)"/></g>
+  <!-- tallrik -->
+  <g filter="url(#sh2)"><circle cx="512" cy="470" r="215" fill="url(#plate)"/></g>
+  <circle cx="512" cy="470" r="162" fill="url(#well)"/>
+  <circle cx="512" cy="470" r="162" fill="none" stroke="#e2ddd3" stroke-width="3"/>
+  <!-- grönsallad -->
+  <g filter="url(#sh2)">
+    <path d="M400 410 C380 360 430 330 470 360 C480 320 540 330 535 375 C500 400 440 430 400 410Z" fill="url(#leaf)"/>
+    <path d="M420 395 C450 375 480 370 515 372" stroke="#c8ec8e" stroke-width="5" fill="none" stroke-linecap="round" opacity=".8"/>
+    <path d="M380 470 C350 430 390 395 430 415 C445 450 420 485 380 470Z" fill="url(#leaf)"/>
+  </g>
+  <!-- lax -->
+  <g filter="url(#sh2)">
+    <path d="M470 430 C540 395 640 410 650 470 C660 530 580 560 520 545 C470 532 440 470 470 430Z" fill="url(#salmon)"/>
+    <path d="M500 450 C540 440 590 445 625 465" stroke="#ffe0cc" stroke-width="7" fill="none" stroke-linecap="round" opacity=".85"/>
+    <path d="M490 485 C535 478 590 484 632 500" stroke="#ffe0cc" stroke-width="7" fill="none" stroke-linecap="round" opacity=".8"/>
+    <path d="M500 518 C540 515 580 520 610 530" stroke="#ffe0cc" stroke-width="6" fill="none" stroke-linecap="round" opacity=".7"/>
+    <path d="M480 432 C540 405 615 412 640 450" stroke="#7a2e14" stroke-width="5" fill="none" opacity=".25" stroke-linecap="round"/>
+  </g>
+  <!-- citron -->
+  <g filter="url(#sh2)"><circle cx="612" cy="395" r="40" fill="url(#lemon)"/>
+  <g stroke="#f7efc0" stroke-width="4" opacity=".9">
+  <line x1="612" y1="395" x2="612" y2="360"/><line x1="612" y1="395" x2="642" y2="378"/><line x1="612" y1="395" x2="642" y2="413"/><line x1="612" y1="395" x2="612" y2="430"/><line x1="612" y1="395" x2="582" y2="413"/><line x1="612" y1="395" x2="582" y2="378"/></g></g>
+  <!-- potatis -->
+  <g filter="url(#sh2)"><ellipse cx="420" cy="540" rx="44" ry="36" fill="url(#pot)"/><ellipse cx="470" cy="585" rx="38" ry="31" fill="url(#pot)"/>
+  <ellipse cx="408" cy="528" rx="14" ry="8" fill="#fff" opacity=".5"/><ellipse cx="460" cy="575" rx="11" ry="6" fill="#fff" opacity=".5"/>
+  <path d="M398 520 l6 -6 M445 568 l5 -5" stroke="#3f7d22" stroke-width="5" stroke-linecap="round"/></g>
+  <!-- tomater -->
+  <g filter="url(#sh2)"><circle cx="560" cy="590" r="28" fill="url(#tom)"/><circle cx="604" cy="570" r="24" fill="url(#tom)"/>
+  <ellipse cx="551" cy="580" rx="8" ry="5" fill="#fff" opacity=".7"/><ellipse cx="597" cy="562" rx="7" ry="4" fill="#fff" opacity=".7"/>
+  <path d="M560 563 l-6 -6 m6 6 l7 -5" stroke="#2f6b1a" stroke-width="4" stroke-linecap="round"/></g>
+  <!-- örtkvistar -->
+  <g fill="#4f9a2c"><circle cx="545" cy="455" r="5"/><circle cx="560" cy="447" r="4"/><circle cx="575" cy="462" r="4"/><circle cx="530" cy="470" r="3.5"/></g>
+  <!-- textrader -->
+  <rect x="318" y="725" width="260" height="30" rx="15" fill="#1f2a24" opacity=".85"/>
+  <rect x="318" y="772" width="170" height="22" rx="11" fill="#1f2a24" opacity=".3"/>
+  <!-- gilla-knapp -->
+  <g filter="url(#sh2)"><circle cx="690" cy="760" r="62" fill="url(#heart)"/>
+  <path d="M690 795 C690 795 650 772 646 745 C643 726 657 712 673 712 C683 712 688 718 690 724 C692 718 697 712 707 712 C723 712 737 726 734 745 C730 772 690 795 690 795Z" fill="#fff"/>
+  <ellipse cx="672" cy="728" rx="26" ry="14" fill="url(#gloss)" opacity=".6"/></g>
+</g>
+</svg>
