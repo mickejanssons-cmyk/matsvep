@@ -59,15 +59,16 @@ function build(src, url, name, img, yieldv, mins, raw, types) {
 
 // ---------- Recept ----------
 async function ica() {
-  const cats = [['notkott', 'lm'], ['kottfars', 'lm'], ['biff', 'lm'], ['pannbiff', 'lm'], ['kalops', 'lm'], ['gryta', 'lm'], ['lasagne', 'lm'], ['hamburgare', 'lm'], ['fisk', 'lm'], ['lax', 'lm'], ['torsk', 'lm'], ['fiskgryta', 'lm'], ['rakor', 'lm'], ['fisk-och-skaldjur', 'lm'], ['frukost', 'f'], ['billig/frukost', 'f'], ['grot', 'f'], ['billig/husmanskost', 'lm'], ['billig/gryta', 'lm'], ['billig/soppa', 'lm'], ['billig/pasta', 'lm'], ['billig/kottfarssas', 'lm'], ['billig/stroganoff', 'lm'], ['billig/omelett', 'lm'], ['billig/pyttipanna', 'lm'], ['billig/tacos', 'lm'], ['billig/wraps', 'l'], ['billig/risotto', 'lm'], ['billig/kottbullar', 'lm'], ['billig/chili-con-carne', 'lm'], ['billig/gratang', 'lm'], ['billig/paj', 'lm'], ['billig/pannkakor', 'lm'], ['billig/sallad', 'l'], ['vardagsmat', 'lm']];
+  const cats = [['frukost', 'f'], ['billig/frukost', 'f'], ['grot', 'f'], ['smoothie', 'f'], ['overnight-oats', 'f'], ['aggrora', 'f'], ['notkott', 'lm'], ['kottfars', 'lm'], ['biff', 'lm'], ['pannbiff', 'lm'], ['kalops', 'lm'], ['gryta', 'lm'], ['lasagne', 'lm'], ['hamburgare', 'lm'], ['fisk', 'lm'], ['lax', 'lm'], ['torsk', 'lm'], ['fiskgryta', 'lm'], ['rakor', 'lm'], ['fisk-och-skaldjur', 'lm'], ['billig/husmanskost', 'lm'], ['billig/gryta', 'lm'], ['billig/soppa', 'lm'], ['billig/pasta', 'lm'], ['billig/kottfarssas', 'lm'], ['billig/stroganoff', 'lm'], ['billig/omelett', 'lm'], ['billig/pyttipanna', 'lm'], ['billig/tacos', 'lm'], ['billig/wraps', 'l'], ['billig/risotto', 'lm'], ['billig/kottbullar', 'lm'], ['billig/chili-con-carne', 'lm'], ['billig/gratang', 'lm'], ['billig/paj', 'lm'], ['billig/pannkakor', 'lm'], ['billig/sallad', 'l'], ['vardagsmat', 'lm']];
   const found = new Map();
   for (const [c, t] of cats) {
     const h = await get('https://www.ica.se/recept/' + c + '/');
     if (!h) continue;
     for (const m of h.matchAll(/\/recept\/([a-z0-9-]+-\d{5,})\//g)) if (!found.has(m[1])) found.set(m[1], t);
   }
-  const ids = [...found.keys()].slice(0, LIMIT.ica);
-  log('ICA recept', ids.length);
+  const all = [...found.keys()];
+  const ids = [...all.filter(k => found.get(k) === 'f').slice(0, 45), ...all.filter(k => found.get(k) !== 'f').slice(0, LIMIT.ica)];
+  log('ICA recept', ids.length, 'varav frukost', ids.filter(k => found.get(k) === 'f').length);
   const out = await pool(ids, 1, async id => {
     await sleep(700);
     const url = 'https://www.ica.se/recept/' + id + '/';
@@ -85,7 +86,8 @@ async function lidl() {
     const h = await get('https://recept.lidl.se/' + c); if (!h) continue;
     for (const m of h.matchAll(/href="(\/recept\/[a-z0-9-]+)"/g)) if (!found.has(m[1])) found.set(m[1], t);
   }
-  const ids = [...found.keys()].slice(0, LIMIT.lidl);
+  const allL = [...found.keys()];
+  const ids = [...allL.filter(k => found.get(k) === 'f').slice(0, 15), ...allL.filter(k => found.get(k) !== 'f').slice(0, LIMIT.lidl)];
   log('Lidl recept', ids.length);
   const out = await pool(ids, 3, async path => {
     const url = 'https://recept.lidl.se' + path;
@@ -254,7 +256,7 @@ recipes = recipes.filter(r => r.i.every(([id]) => have.has(id)) || (r.i = r.i.fi
 recipes = recipes.filter(r => { const c = perPortion(r); r.pp = Math.round(c * 10) / 10; return c > 0.5 && c <= 110; });
 
 let old = null; try { old = JSON.parse(await fs.readFile('data/data.json', 'utf8')); } catch { }
-if (products.length < 40 || recipes.length < 30) {
+if (products.length < 40 || recipes.length < 30 || recipes.filter(r => r.t.includes('f')).length < 5) {
   log('För lite data hämtades (produkter', products.length, 'recept', recipes.length + '). Behåller förra filen.');
   if (old) process.exit(0); else process.exit(1);
 }

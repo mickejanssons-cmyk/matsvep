@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Matsvep">
@@ -18,7 +18,9 @@
 :root{--bg:#ffffff;--ink:#15171a;--mut:#6d7177;--soft:#f4f3f0;--line:#ebe9e4;--card:#fff;--green:#23704a;--green2:#e6f2ec;--red:#e4572e;--tag:#ffd23f;--shadow:0 10px 30px rgba(20,20,20,.10)}
 @media (prefers-color-scheme:dark){:root{--bg:#111312;--ink:#f2f1ee;--mut:#9ea19f;--soft:#1c1f1d;--line:#2a2e2b;--card:#191c1a;--green:#4cc286;--green2:#173326;--shadow:0 10px 30px rgba(0,0,0,.4)}}
 *{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 'Plus Jakarta Sans',system-ui,sans-serif;overflow-x:clip}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 'Plus Jakarta Sans',system-ui,sans-serif;overflow-x:clip;-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
+*{touch-action:manipulation}
+.card{touch-action:pan-y!important}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid var(--tag);outline-offset:2px}
@@ -39,7 +41,7 @@ main{padding:16px 18px calc(110px + env(safe-area-inset-bottom));max-width:720px
 .view{display:none}.view.on{display:block}
 h1{font-size:28px;line-height:1.1;margin:4px 0 14px;font-weight:800;letter-spacing:-.03em}
 h3{font-size:17px;margin:22px 0 8px;font-weight:700}
-.mut{color:var(--mut)}.small{font-size:13px}
+.mut{color:var(--mut)}.small{font-size:14px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .field{flex:1 1 150px;display:flex;flex-direction:column;gap:5px}
 .field label{font-size:13px;color:var(--mut);font-weight:600}
@@ -64,7 +66,7 @@ input[type=number]{background:var(--soft);border:1px solid transparent;border-ra
 .meal{position:relative;border:0;border-radius:14px;aspect-ratio:1/1.1;overflow:hidden;padding:0;background:var(--soft);text-align:left;color:#fff}
 .meal img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .meal .sh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.75))}
-.meal .lab{hyphens:auto;overflow-wrap:anywhere;position:absolute;left:8px;right:8px;bottom:7px;font-size:12px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.meal .lab{hyphens:auto;overflow-wrap:anywhere;position:absolute;left:8px;right:8px;bottom:7px;font-size:13px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .meal .ty{position:absolute;left:8px;top:7px;font-size:10.5px;font-weight:800;letter-spacing:.02em;background:rgba(0,0,0,.45);padding:2px 7px;border-radius:999px}
 .meal.empty{color:var(--mut);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:1.5px dashed var(--line);background:none}
 .meal.empty b{font-size:24px;line-height:1;color:var(--green)}
@@ -80,7 +82,7 @@ input[type=number]{background:var(--soft);border:1px solid transparent;border-ra
 .slot{margin:12px 2px 10px;font-size:14px;color:var(--mut)}
 .slot b{color:var(--ink)}
 .deck{position:relative;height:min(64vh,560px);min-height:440px;max-width:440px;margin:0 auto}
-.card{position:absolute;inset:0;border-radius:28px;overflow:hidden;background:#222;box-shadow:var(--shadow);touch-action:pan-y;user-select:none;-webkit-user-select:none;transition:transform .28s ease;color:#fff}
+.card{position:absolute;inset:0;border-radius:28px;overflow:hidden;background:#222;box-shadow:var(--shadow);touch-action:pan-y;user-select:none;-webkit-user-select:none;transition:transform .2s ease;color:#fff}
 .card.drag{transition:none}
 .card.b1{transform:scale(.95) translateY(16px);pointer-events:none}
 .card.b2{transform:scale(.9) translateY(32px);pointer-events:none;opacity:.6}
@@ -91,7 +93,7 @@ input[type=number]{background:var(--soft);border:1px solid transparent;border-ra
 .card .nm{font-size:25px;font-weight:800;line-height:1.1;letter-spacing:-.02em;text-wrap:balance}
 .card .meta{font-size:14px;opacity:.9;margin-top:6px}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.chip{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.18);backdrop-filter:blur(6px)}
+.chip{font-size:13px;font-weight:800;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.18);backdrop-filter:blur(6px)}
 .chip.g{background:#2fbf71}.chip.y{background:var(--tag);color:#15171a}.chip.r{background:var(--red)}
 .srcb{position:absolute;left:16px;top:16px;font-size:12px;font-weight:800;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.92);color:#15171a}
 .price{position:absolute;right:14px;top:14px;background:var(--tag);color:#15171a;border-radius:14px;padding:8px 12px 7px;text-align:right;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.2)}
@@ -115,7 +117,7 @@ input[type=number]{background:var(--soft);border:1px solid transparent;border-ra
 .item{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}
 .item input{width:22px;height:22px;margin-top:2px;accent-color:var(--green)}
 .item .n{font-weight:700}
-.item .d{font-size:13px;color:var(--mut)}
+.item .d{font-size:14px;color:var(--mut)}
 .item .p{font-weight:800;white-space:nowrap;text-align:right}
 .item .p small{display:block;font-weight:600;font-size:11.5px;color:var(--mut)}
 .item.done .n{text-decoration:line-through;opacity:.5}
@@ -136,7 +138,7 @@ input[type=number]{background:var(--soft);border:1px solid transparent;border-ra
 .ofr img{width:44px;height:44px;object-fit:contain;background:#fff;border-radius:8px}
 /* flikar */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
-.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--mut);min-height:52px;position:relative}
+.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12.5px;font-weight:700;color:var(--mut);min-height:52px;position:relative}
 .tabs svg{width:25px;height:25px}
 .tabs button.on{color:var(--green)}
 .badge{position:absolute;top:2px;left:calc(50% + 6px);background:var(--red);color:#fff;font-size:10.5px;border-radius:999px;padding:1px 6px}
@@ -149,7 +151,9 @@ input[type=number]{background:var(--soft);border:1px solid transparent;border-ra
 .hero img{width:100%;height:100%;object-fit:cover}
 .hero .x{position:absolute;right:14px;top:14px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:#15171a;font-size:20px;font-weight:700}
 .sb{padding:16px 18px}
-.ing{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.ing{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:1em}
+.sb{font-size:calc(17px * var(--fs,1))}.sb h1{font-size:1.65em}.sb .small{font-size:.85em}
+.fsz{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:8px}.fsz button{width:48px;height:44px;border-radius:12px;border:0;background:var(--soft);font-weight:800}
 .ing span:last-child{color:var(--mut);white-space:nowrap}
 .est{font-size:11px;font-weight:700;background:var(--soft);color:var(--mut);border-radius:6px;padding:1px 6px;margin-left:4px}
 .toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:14px;font-weight:700;font-size:14px;opacity:0;transition:.25s;z-index:60;pointer-events:none;max-width:90vw;text-align:center}
@@ -248,7 +252,7 @@ const KEY='matsvep-web-v1';
 let D=null,P={},R=[],RID={};
 
 function defaults(){const en={};for(let d=0;d<7;d++){en[d+'f']=1;en[d+'m']=1;if(d>4)en[d+'l']=1}
-  return {budget:900,pers:2,store:'willys',en,plan:{},have:{},bought:{},rej:{f:[],l:[],m:[]},tab:'svep',type:'m',src:'Alla',over:false,pro:{not:1,fisk:1,kyck:1,flask:1,veg:0},offStore:null}}
+  return {budget:900,pers:2,store:'willys',en,plan:{},have:{},bought:{},rej:{f:[],l:[],m:[]},tab:'svep',type:'m',src:'Alla',over:false,pro:{not:1,fisk:1,kyck:1,flask:1,veg:0},offStore:null,fs:1}}
 let S=defaults();
 try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o)S=Object.assign(S,o,{rej:Object.assign({f:[],l:[],m:[]},o.rej||{}),pro:Object.assign({not:1,fisk:1,kyck:1,flask:1,veg:0},o.pro||{})})}catch(e){}
 const PRO={not:'Nötkött',fisk:'Fisk',kyck:'Kyckling',flask:'Fläsk',veg:'Vegetariskt'};
@@ -311,7 +315,7 @@ let target=null,deck=[];const jit={};const J=id=>jit[id]??(jit[id]=.8+Math.rando
 function freeSlot(t){if(target&&target[1]===t&&S.en[target]&&!(S.plan[target]&&rec(S.plan[target])))return target;for(let d=0;d<7;d++){const k=d+t;if(S.en[k]&&!(S.plan[k]&&rec(S.plan[k])))return k}return null}
 function buildDeck(t){
   const ids=planIds(),base=kassa(ids),used=new Set(ids),inWeek=new Set(Object.keys(needs(ids)));
-  let c=R.filter(r=>(t==='f'?r.t.includes('f'):r.t.includes(t)||(r.t==='lm'))&&!(t!=='f'&&r.t==='f')&&!used.has(r.id)&&!S.rej[t].includes(r.id)&&(S.src==='Alla'||r.src===S.src)&&(t==='f'||proOf(r).some(k=>S.pro[k])));
+  let c=R.filter(r=>(t==='f'?r.t.includes('f'):r.t.includes(t)||(r.t==='lm'))&&!(t!=='f'&&r.t==='f')&&(t==='f'||!used.has(r.id))&&!S.rej[t].includes(r.id)&&(S.src==='Alla'||r.src===S.src)&&(t==='f'||proOf(r).some(k=>S.pro[k])));
   c=c.map(r=>{const k2=kassa(ids.concat(r.id));return{r,marg:k2-base,fits:k2<=S.budget,share:r.i.filter(([id])=>inWeek.has(id)&&!P[id]?.base).length,offer:r.i.some(([id])=>(D.offers[S.store]||{})[id]),boost:proOf(r).some(k=>k==='not'||k==='fisk')?.75:1}});
   if(!S.over)c=c.filter(x=>x.fits);
   return c.sort((a,b)=>(b.fits-a.fits)||(a.marg*a.boost*J(a.r.id)-b.marg*b.boost*J(b.r.id)));
@@ -351,7 +355,7 @@ function decide(ok){if(busy)return;const c=$('#deck .card:last-child');if(!c)ret
   setTimeout(()=>{busy=false;const t=S.type;
     if(ok){const slot=freeSlot(t);if(slot){S.plan[slot]=id;target=null;toast(rec(id).n+' → '+DAYS[+slot[0]].toLowerCase(),()=>{delete S.plan[slot];save();render()})}}
     else{S.rej[t].push(id);toast('Bortsvept',()=>{S.rej[t]=S.rej[t].filter(x=>x!==id);save();render()})}
-    save();render()},250)}
+    save();render()},190)}
 $('#yesBtn').onclick=()=>decide(true);$('#noBtn').onclick=()=>decide(false);
 $('#infoBtn').onclick=()=>{const c=$('#deck .card:last-child');if(c)openSheet(c.dataset.id,{deck:1})};
 $('#typePills').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b||b.disabled)return;S.type=b.dataset.t;target=null;save();renderSvep()});
@@ -408,6 +412,7 @@ $('#storeBtn').onclick=()=>go('butik');
 function openSheet(id,o){const r=rec(id);if(!r)return;o=o||{};const pp=portion(r),host=new URL(r.u).hostname.replace('www.','');
   $('#sheet').innerHTML=`<div class="hero">${img(r)}<button class="x" type="button" id="shX" aria-label="Stäng">×</button></div><div class="sb">
   <div class="chips" style="margin-top:0"><span class="chip" style="background:var(--soft);color:var(--ink)">${esc(r.src)}</span>${r.min?`<span class="chip" style="background:var(--soft);color:var(--ink)">${r.min} min</span>`:''}</div>
+  <div class="fsz"><span class="small mut">Textstorlek</span><button type="button" id="fsM" aria-label="Mindre text">A−</button><button type="button" id="fsP" aria-label="Större text">A+</button></div>
   <h1 style="margin:10px 0 4px">${esc(r.n)}</h1>
   <p class="mut" style="margin:0">Råvaror för ${S.pers} portioner: <b style="color:var(--ink)">${kr1(pp*S.pers)}</b> · ${kr1(pp)}/portion på ${esc(D.stores[S.store].n)}</p>
   <a class="btn pri" style="display:flex;align-items:center;justify-content:center;margin-top:14px;text-decoration:none" href="${esc(r.u)}" target="_blank" rel="noopener">Gör så här – öppna på ${esc(host)}</a>
@@ -416,6 +421,8 @@ function openSheet(id,o){const r=rec(id);if(!r)return;o=o||{};const pp=portion(r
   <h3>Det appen räknar med för ${S.pers} portioner</h3>${r.i.filter(([x])=>P[x]).map(([x,a,es])=>`<div class="ing"><span>${esc(P[x].n)}${es?'<span class="est">uppskattad</span>':''}</span><span>${amt(a/r.p*S.pers,P[x].unit)}</span></div>`).join('')}
   <p class="small mut">${r.cover} % av ingredienserna (utom kryddor och vatten) har pris. "Uppskattad" = receptet anger ingen mängd, appen räknar en vanlig portion.</p></div>`;
   $('#sheet').classList.add('on');$('#scrim').classList.add('on');$('#sheet').scrollTop=0;$('#shX').onclick=closeSheet;
+  const fsApply=()=>$('#sheet').style.setProperty('--fs',S.fs||1);fsApply();
+  $('#fsM').onclick=()=>{S.fs=Math.max(.9,Math.round(((S.fs||1)-.15)*100)/100);save();fsApply()};$('#fsP').onclick=()=>{S.fs=Math.min(1.75,Math.round(((S.fs||1)+.15)*100)/100);save();fsApply()};
   if(o.deck){$('#shY').onclick=()=>{closeSheet();decide(true)};$('#shN').onclick=()=>{closeSheet();decide(false)}}
   if(o.slot){$('#shD').onclick=()=>{const old=S.plan[o.slot];delete S.plan[o.slot];save();closeSheet();render();toast('Borttagen',()=>{S.plan[o.slot]=old;save();render()})};
     $('#shS').onclick=()=>{const old=S.plan[o.slot];delete S.plan[o.slot];S.rej[o.slot[1]].push(old);S.type=o.slot[1];target=o.slot;save();closeSheet();go('svep')}}}
@@ -430,6 +437,9 @@ $('#tabs').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(
 document.addEventListener('click',e=>{const g=e.target.closest('main [data-go]');if(g&&!e.target.closest('#deck,#list'))go(g.dataset.go)});
 function render(){if(!D)return;renderTop();({vecka:renderWeek,svep:renderSvep,lista:renderList,butik:renderStore}[S.tab]||renderSvep)()}
 
+/* ---------- ingen zoom ---------- */
+['gesturestart','gesturechange'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('dblclick',e=>e.preventDefault());
 /* ---------- start ---------- */
 fetch('data/data.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{D=d;d.products.forEach(p=>P[p.id]=p);R=d.recipes;R.forEach(r=>RID[r.id]=r);
   d.products.forEach(p=>{if(p.base&&S.have[p.id]===undefined)S.have[p.id]=true});$('#loading').remove();go(S.tab||'svep')})
